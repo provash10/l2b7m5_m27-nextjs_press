@@ -1,0 +1,15 @@
+app router and page router in next js
+
+https://dev.to/shyam0118/app-router-vs-pages-router-in-nextjs-a-deep-practical-guide-341g
+
+
+https://jsonplaceholder.typicode.com/posts
+
+
+#m28
+https://github.com/Apollo-Level2-Web-Dev/project-nextjs-press-frontend/tree/module-28-project-starter-pack
+
+https://github.com/Apollo-Level2-Web-Dev/project-nextjs-press-frontend/tree/module-28
+
+
+route grouping ---nextjs----  API References / file system convention
