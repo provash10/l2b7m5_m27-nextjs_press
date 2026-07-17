@@ -10,8 +10,10 @@ import {
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import LoginButton from "../_components/LoginButton"
 
 export default function LoginPage() {
+    console.log(process.env.BACKEND_API_URL)
   return (
     <Card className="w-full max-w-sm">
       <CardHeader>
@@ -57,6 +59,8 @@ export default function LoginPage() {
         <Button variant="outline" className="w-full">
           Login with Google
         </Button>
+
+        <LoginButton></LoginButton>
       </CardFooter>
     </Card>
   )
