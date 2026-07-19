@@ -38,7 +38,57 @@ const userMenuItems = [
   { label: "Settings", href: "/settings", icon: SettingsIcon },
 ];
 
-export function Navbar() {
+//  "data": {
+//         "profile": {
+//             "id": "8dc64e20-1c38-495e-8b83-d86dcf8a93dd",
+//             "name": "Salman Shah",
+//             "email": "salmanshah100@gmail.com",
+//             "profilePhoto": null,
+//             "activeStatus": "ACTIVE",
+//             "role": "USER",
+//             "createdAt": "2026-07-18T17:09:51.088Z",
+//             "updatedAt": "2026-07-18T17:09:51.088Z",
+//             "profile": {
+//                 "id": "544561d9-c952-44b5-9277-1b1d2a91dcef",
+//                 "profilePhoto": "https://example.com/photo.jpg",
+//                 "bio": "",
+//                 "userId": "8dc64e20-1c38-495e-8b83-d86dcf8a93dd",
+//                 "createdAt": "2026-07-18T17:09:51.088Z",
+//                 "updatedAt": "2026-07-18T17:09:51.088Z"
+//             }
+//         }
+//     }
+
+type IUser = {
+  success: boolean;
+  message: string;
+  data?: {
+    profile: {
+      id: string;
+      name: string;
+      email: string;
+      profilePhoto: string | null;
+      activeStatus: string;
+      role: string;
+      createdAt: string;
+      updatedAt: string;
+      profile: {
+        id: string;
+        profilePhoto: string | null;
+        bio: string;
+        userId: string;
+        createdAt: string;
+        updatedAt: string;
+      };
+    };
+  };
+};
+
+type NavbarProps = {
+  user: IUser | null | undefined;
+};
+
+export function Navbar({user} : NavbarProps) {
   const pathname = usePathname();
 
   return (
@@ -96,10 +146,12 @@ export function Navbar() {
             <DropdownMenuLabel>
               <div className="flex flex-col">
                 <span className="text-sm font-medium text-foreground">
-                  Jane Doe
+                  {/* Jane Doe */}
+                  {user?.data?.profile.name || "Name"}
                 </span>
                 <span className="text-xs font-normal text-muted-foreground">
-                  jane@acme.com
+                  {/* jane@acme.com */}
+                  {user?.data?.profile.email || "Email"}
                 </span>
               </div>
             </DropdownMenuLabel>
