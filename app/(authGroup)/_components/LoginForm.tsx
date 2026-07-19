@@ -6,17 +6,21 @@ import { Input } from "@/components/ui/input";
 import React, { useActionState, useEffect } from "react";
 import { loginAction } from "../_actions/authActions";
 import { toast } from "sonner";
+// import { useRouter } from "next/navigation";
 
 const LoginForm = () => {
+  // Passed null instead of false as the initial state to match the LoginState | null type
+  const [state, action, pending]= useActionState(loginAction, null)
 
-  const [state, action, pending]= useActionState(loginAction,false)
+  // const router = useRouter();
 
   useEffect(()=>{
     if(!state) return;
 
-    if(state.success){
-       toast.success(state.message || "Login Successfull !!")
-    }
+    // if(state.success){
+    //    toast.success(state.message || "Login Successfull !!");
+    //   //  router.push("/dashboard")
+    // }
     if(!state.success){
       toast.error(state.message || "Login Failed")
     }
