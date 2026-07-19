@@ -1,15 +1,18 @@
 "use client";
 
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { toast } from "sonner";
 import {
   CircleUserIcon,
   CreditCardIcon,
   LayoutDashboardIcon,
-  LogOutIcon,
+  LogOut,
   SettingsIcon,
   UserIcon,
 } from "lucide-react";
+import { logout } from "@/service/logOut";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -91,6 +94,26 @@ type NavbarProps = {
 export function Navbar({user} : NavbarProps) {
   const pathname = usePathname();
 
+  console.log(user?.success, "success")
+  const router = useRouter();
+  const handleUserMenuAction = async(action: string) =>{
+
+     if(action ==="logout"){
+      await logout();
+      toast.success("User Logged Out Successfully");
+      router.push("/login");
+      router.refresh();
+     }
+  };
+
+  // useEffect(()=>{
+  //   if(user && !user?.success){
+  //     toast.success("User Logged Out Successfully")
+  //   }
+  // }, [user?.success])
+
+ 
+
   return (
     <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between gap-4 px-4">
@@ -128,60 +151,69 @@ export function Navbar({user} : NavbarProps) {
         </nav>
 
         {/* User dropdown */}
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="rounded-full"
-              aria-label="Open user menu"
-            >
-              <Avatar className="size-8">
-                <AvatarImage src="/diverse-avatars.png" alt="User avatar" />
-                <AvatarFallback>JD</AvatarFallback>
-              </Avatar>
+        {
+          user?.success ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="rounded-full"
+                  aria-label="Open user menu"
+                >
+                  <Avatar className="size-8">
+                    <AvatarImage src="/diverse-avatars.png" alt="User avatar" />
+                    <AvatarFallback>JD</AvatarFallback>
+                  </Avatar>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuLabel>
+                  <div className="flex flex-col">
+                    <span className="text-sm font-medium text-foreground">
+                      {/* Jane Doe */}
+                      {user?.data?.profile.name || "Name"}
+                    </span>
+                    <span className="text-xs font-normal text-muted-foreground">
+                      {/* jane@acme.com */}
+                      {user?.data?.profile.email || "Email"}
+                    </span>
+                  </div>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuGroup>
+                  {userMenuItems.map((item) => {
+                    const Icon = item.icon;
+                    return (
+                      <DropdownMenuItem key={item.href} asChild>
+                        <Link
+                          href={item.href}
+                          className="flex cursor-pointer items-center gap-2"
+                        >
+                          <Icon />
+                          {item.label}
+                        </Link>
+                      </DropdownMenuItem>
+                    );
+                  })}
+                </DropdownMenuGroup>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={async () => {
+                  await handleUserMenuAction("logout");
+                }}>
+                  <LogOut className="w-4 h-4 mr-2" />
+                  <span>Log out</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <Button asChild size="sm">
+              <Link href="/login" className="cursor-pointer">
+                Login
+              </Link>
             </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-56">
-            <DropdownMenuLabel>
-              <div className="flex flex-col">
-                <span className="text-sm font-medium text-foreground">
-                  {/* Jane Doe */}
-                  {user?.data?.profile.name || "Name"}
-                </span>
-                <span className="text-xs font-normal text-muted-foreground">
-                  {/* jane@acme.com */}
-                  {user?.data?.profile.email || "Email"}
-                </span>
-              </div>
-            </DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuGroup>
-              {userMenuItems.map((item) => {
-                const Icon = item.icon;
-                return (
-                  <DropdownMenuItem key={item.href} asChild>
-                    <Link
-                      href={item.href}
-                      className="flex cursor-pointer items-center gap-2"
-                    >
-                      <Icon />
-                      {item.label}
-                    </Link>
-                  </DropdownMenuItem>
-                );
-              })}
-            </DropdownMenuGroup>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem
-              variant="destructive"
-              onClick={() => console.log("[v0] Sign out clicked")}
-            >
-              <LogOutIcon />
-              Sign out
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+          )
+        }
       </div>
     </header>
   );
