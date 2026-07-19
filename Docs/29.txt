@@ -18,3 +18,6 @@ https://nextjs.org/docs/pages/api-reference/functions/use-router
 
 https://v0.app/provash10/chat/navigation-bar-hf86aEaRSVi
 
+29-7
+error.js
+https://nextjs.org/docs/app/api-reference/file-conventions/error
