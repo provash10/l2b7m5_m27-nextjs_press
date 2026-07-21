@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
+import jwt, { JwtPayload } from "jsonwebtoken"
 
 // Updated LoginState type to support both success and failure cases.
 type LoginState = {
@@ -54,11 +55,18 @@ export const loginAction = async (prevState : LoginState | null , formData: Form
                 maxAge : 60 * 60 * 24 * 7,
                 sameSite: "lax"
             })
-        }
 
-        // Correctly redirect the user to the dashboard
-        redirect("/dashboard");
-        // redirect("/dashboard", "replace");
+            const decodedToken = jwt.decode(result.data.accessToken) as JwtPayload;
+            console.log(decodedToken);
+
+            if(decodedToken?.role === "USER"){
+                redirect("/dashboard");
+            }else if(decodedToken?.role ==="ADMIN"){
+                redirect("/admin-dashboard");
+            }else if(decodedToken?.role ==="AUTHOR"){
+                redirect("/author-dashboard");
+            }
+        }
     }
 
     return result;
