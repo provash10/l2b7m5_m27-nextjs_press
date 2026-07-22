@@ -29,9 +29,13 @@ import {
 
 const navLinks = [
   { label: "Home", href: "/" },
+  { label: "About", href: "/about" },
   { label: "Dashboard", href: "/dashboard" },
   { label: "Projects", href: "/projects" },
-  { label: "Pricing", href: "/pricing" },
+  { label: "Services", href: "/services" },
+  { label: "Contact", href: "/contact" },
+  { label: "News", href: "/news" },
+  { label: "Premium", href: "/premium" },
 ];
 
 const userMenuItems = [
@@ -39,6 +43,7 @@ const userMenuItems = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboardIcon },
   { label: "Billing", href: "/billing", icon: CreditCardIcon },
   { label: "Settings", href: "/settings", icon: SettingsIcon },
+  
 ];
 
 //  "data": {

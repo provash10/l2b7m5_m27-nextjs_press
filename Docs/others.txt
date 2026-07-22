@@ -1,0 +1,1 @@
+A. (publicGroup)>> _components> 1. news folder>>NewsCard.tsx,NewsSkeleton.tsx,PremiumNewsList.tsx,PublicNewsList.tsx 2. payment folder >>> PricingSection.tsx, PricingSectionLoader.tsx,SubscribeButton.tsx B. (publicGroup) >>>payment>page.tsx and premium>page.tsx  C.shared >navbar.tsx(tik ase kina deko)  akon agulo create koro
