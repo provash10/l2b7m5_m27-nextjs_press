@@ -23,6 +23,7 @@ export interface NewsItem {
 }
 
 import { IPost } from "@/lib/types";
+import Image from "next/image";
 
 interface NewsCardProps {
   news: NewsItem | IPost;
@@ -38,7 +39,10 @@ export function NewsCard({ news }: NewsCardProps) {
   const description = (news as any).description || (news as any).content || "";
   const category = (news as any).category || "General";
   const readTime = (news as any).readTime || "5 min read";
-  const image = (news as any).image || (news as any).thumbnail || "https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=800&auto=format&fit=crop&q=60";
+  const post = {
+    ...news,
+    thumbnail: (news as any).image || (news as any).thumbnail || "https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=800&auto=format&fit=crop&q=60"
+  };
   const authorName = news.author?.name || "Author";
   const authorAvatar = (news.author as any)?.avatar || 
                        (news.author as any)?.profilePhoto || 
@@ -48,9 +52,18 @@ export function NewsCard({ news }: NewsCardProps) {
     <article className="group relative flex flex-col overflow-hidden rounded-2xl border border-border/60 bg-card text-card-foreground shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-primary/30 hover:shadow-md dark:border-border/30 dark:bg-card/50">
       {/* Image Wrapper */}
       <div className="relative aspect-video w-full overflow-hidden bg-muted">
-        <img
+        {/* <img
           src={image}
           alt={title}
+          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+          loading="lazy"
+        /> */}
+        <Image
+          src={post.thumbnail} 
+          unoptimized
+          width={500}
+          height={500}
+          alt={post.title}
           className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
           loading="lazy"
         />
