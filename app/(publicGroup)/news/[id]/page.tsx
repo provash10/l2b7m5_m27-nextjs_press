@@ -1,7 +1,13 @@
 import React from "react";
 
-const NewsByIdPage = () => {
-  return <div>NewsByIdPage</div>;
+const NewsByIdPage = async({
+  params,
+}: {
+  params: Promise<{ id: string }>
+}) => {
+
+  const { id } = await params
+  return <div>NewsByIdPage {id}</div>;
 };
 
 export default NewsByIdPage;
