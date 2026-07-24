@@ -3,19 +3,21 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { CheckIcon } from "lucide-react";
 import { SubscribeButton } from "./SubscribeButton";
 import { getMe } from "@/service/getMe";
+import { getSubscriptionStatus } from "../../_actions/getSubscriptionStatus";
 
 export async function PricingSection() {
-  const meResult = await getMe();
+  const getMeResult = await getMe();
 
-  const statusResult = {
-    success: meResult.success,
-    data: {
-      isSubscribed: Boolean(meResult.success && meResult.data?.profile?.subscription?.status === "ACTIVE"),
-      currentPeriodEnd: meResult.success && meResult.data?.profile?.subscription?.currentPeriodEnd
-        ? new Date(meResult.data.profile.subscription.currentPeriodEnd).toISOString()
-        : new Date().toISOString(),
-    },
-  };
+  const statusResult = await getSubscriptionStatus();
+  // const statusResult = {
+  //   success: meResult.success,
+  //   data: {
+  //     isSubscribed: Boolean(meResult.success && meResult.data?.profile?.subscription?.status === "ACTIVE"),
+  //     currentPeriodEnd: meResult.success && meResult.data?.profile?.subscription?.currentPeriodEnd
+  //       ? new Date(meResult.data.profile.subscription.currentPeriodEnd).toISOString()
+  //       : new Date().toISOString(),
+  //   },
+  // };
 
   const isActive = Boolean(
     statusResult?.success && statusResult.data?.isSubscribed
@@ -53,8 +55,8 @@ export async function PricingSection() {
             Support independent journalism
           </li>
         </ul>
-        {/* {!isActive && <SubscribeButton />} */}
-        {<SubscribeButton />}
+        {!isActive && <SubscribeButton />}
+        {/* {<SubscribeButton />} */}
       </CardContent>
     </Card>
   );
