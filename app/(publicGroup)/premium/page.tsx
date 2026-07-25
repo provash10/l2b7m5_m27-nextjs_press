@@ -22,7 +22,7 @@ const PremiumPage = async ({
       </div>
 
       <Suspense fallback={<NewsSkeleton />}>
-        <PremiumNewsList />
+        <PremiumNewsList searchParams={searchParams} />
       </Suspense>
     </div>
   );

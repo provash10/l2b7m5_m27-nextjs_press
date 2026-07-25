@@ -1,6 +1,7 @@
 import React, { Suspense } from "react";
 import { PricingSection } from "../_components/payment/PricingSection";
 import { PricingSectionLoader } from "../_components/payment/PricingSectionLoader";
+import { NewsSearchBar } from "../_components/news/NewsSearchBar";
 
 const PaymentPage = () => {
   return (
@@ -10,6 +11,8 @@ const PaymentPage = () => {
         <p className="text-sm text-muted-foreground">
           Subscribe to unlock premium news content.
         </p>
+
+        <NewsSearchBar></NewsSearchBar>
       </div>
 
       <Suspense fallback={<PricingSectionLoader />}>

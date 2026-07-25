@@ -1,59 +1,24 @@
-import { NewsCard } from "@/app/(publicGroup)/_components/news/NewsCard";
-import { IPost } from "@/lib/types";
 import { getPremiumNews } from "../../_actions/getPremiumNews";
+import { getSubscriptionStatus } from "../../_actions/getSubscriptionStatus";
+import { PremiumNewsListClient } from "./PremiumNewsListClient";
 
 export async function PremiumNewsList({
-  searchTerm,
-  tags,
+  searchParams,
 }: {
-  searchTerm?: string;
-  tags?: string[];
+  searchParams?: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
-  const result = await getPremiumNews();
+  const query = await searchParams;
+  const result = await getPremiumNews({ query });
+  const subscriptionStatus = await getSubscriptionStatus();
+  const hasActiveSubscription = !!(subscriptionStatus.success && subscriptionStatus.data?.isSubscribed);
 
-  if (!result.success || !result.data?.length) {
-    return (
-      <p className="py-12 text-center text-muted-foreground">
-        No premium news found.
-      </p>
-    );
-  }
-
-  let posts: IPost[] = result.data || [];
-
-  if (searchTerm) {
-    const term = searchTerm.toLowerCase();
-    posts = posts.filter(
-      (post: IPost) =>
-        post.title.toLowerCase().includes(term) ||
-        post.content.toLowerCase().includes(term) ||
-        (post.tags && post.tags.some((tag) => tag.toLowerCase().includes(term)))
-    );
-  }
-
-  if (tags && tags.length > 0) {
-    posts = posts.filter(
-      (post: IPost) =>
-        post.tags && post.tags.some((tag) => tags.includes(tag))
-    );
-  }
-
-  if (posts.length === 0) {
-    return (
-      <p className="py-12 text-center text-muted-foreground">
-        No premium news matches your search criteria.
-      </p>
-    );
-  }
+  const posts = result.success && result.data ? result.data : [];
 
   return (
-    <div className="space-y-8">
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {posts.map((post: IPost) => (
-          <NewsCard key={post.id} news={post} />
-        ))}
-      </div>
-    </div>
+    <PremiumNewsListClient
+      initialNews={posts}
+      hasActiveSubscription={hasActiveSubscription}
+    />
   );
 }
 

@@ -2,36 +2,39 @@
 
 import { cookies } from "next/headers";
 
-export const getPremiumNews = async()=>{
-    
-    const cookieStore = await cookies();
-    
-        const accessToken = cookieStore.get("accessToken")?.value || null;
-        console.log(accessToken)
-    
-        if(!accessToken){
-            // throw new Error("User not Logged In");
-    
-            return{
-                success : false,
-                message : "User not Logged In",
-            }
-        }
-    
-    const res = await fetch(`${process.env.BACKEND_API_URL}/api/premium`,{
-        headers :{
-            // Authorization : accessToken as unknown as string,
-            // Authorization : `${accessToken}`,
-            // Authorization : `Bearer ${accessToken}`,
-            Cookie : `accessToken=${accessToken}`
-        },
-        
-        cache : "no-store",
-        next: {
-            tags:["premium-posts"]
-        }
-    });
+export const getPremiumNews = async ({
+  query,
+}: {
+  query?: { [key: string]: string | string[] | undefined };
+} = {}) => {
+  const params = new URLSearchParams();
+  if (query?.searchTerm) {
+    params.set("searchTerm", query.searchTerm as string);
+  }
+  console.log(params.toString(), "params");
 
-    const result = await res.json();
-    return result;
-}
+  const queryString = params.toString() ? `?${params.toString()}` : "";
+
+  const cookieStore = await cookies();
+  const accessToken = cookieStore.get("accessToken")?.value || null;
+
+  if (!accessToken) {
+    return {
+      success: false,
+      message: "User not logged in!",
+    };
+  }
+
+  const res = await fetch(`${process.env.BACKEND_API_URL}/api/premium?${params}`, {
+    headers: {
+      Cookie: `accessToken=${accessToken}`,
+    },
+    cache: "no-store",
+    next: {
+      tags: ["premium-posts"],
+    },
+  });
+
+  const result = await res.json();
+  return result;
+};
