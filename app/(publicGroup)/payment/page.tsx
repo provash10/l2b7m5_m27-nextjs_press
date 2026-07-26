@@ -12,7 +12,9 @@ const PaymentPage = () => {
           Subscribe to unlock premium news content.
         </p>
 
-        <NewsSearchBar></NewsSearchBar>
+        <Suspense fallback={<div>Loading search...</div>}>
+          <NewsSearchBar />
+        </Suspense>
       </div>
 
       <Suspense fallback={<PricingSectionLoader />}>

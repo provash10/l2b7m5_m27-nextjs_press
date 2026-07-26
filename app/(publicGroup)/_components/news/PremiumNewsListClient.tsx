@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { NewsCard, NewsItem } from "./NewsCard";
-import { Lock, Sparkles, Search, Newspaper, ArrowRight } from "lucide-react";
+import { Lock, Newspaper, ArrowRight } from "lucide-react";
 import Link from "next/link";
 
 interface PremiumNewsListClientProps {
@@ -59,106 +59,34 @@ const MOCK_PREMIUM_NEWS: NewsItem[] = [
   },
 ];
 
-const CATEGORIES = ["All", "Technology", "Cybersecurity", "Business"];
-
 export function PremiumNewsListClient({ initialNews, hasActiveSubscription }: PremiumNewsListClientProps) {
   // Use fetched news, but fallback to mock data if none is returned to guarantee a beautiful presentation
   const newsList = initialNews.length > 0 ? initialNews : MOCK_PREMIUM_NEWS;
 
   // Let client toggle subscription simulation for preview/demo flow testing
   const [isSubscribed, setIsSubscribed] = useState(hasActiveSubscription);
-  const [selectedCategory, setSelectedCategory] = useState("All");
-  const [searchQuery, setSearchQuery] = useState("");
-
-  const filteredNews = newsList.filter((item) => {
-    const matchesCategory = selectedCategory === "All" || item.category.toLowerCase() === selectedCategory.toLowerCase();
-    const matchesSearch =
-      item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.description.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesCategory && matchesSearch;
-  });
 
   return (
     <div className="space-y-8">
-      {/* Header Controls */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <div className="flex items-center gap-2">
-            <span className="flex h-7 w-7 items-center justify-center rounded-xl bg-amber-500 text-white shadow-md shadow-amber-500/20">
-              <Sparkles className="h-4.5 w-4.5" />
-            </span>
-            <h2 className="text-2xl font-bold tracking-tight text-foreground md:text-3xl">
-              Exclusive Premium Insights
-            </h2>
-          </div>
-          <p className="text-sm text-muted-foreground mt-1.5">
-            Deep-dives, expert reviews, and industry analysis updated daily for our members.
-          </p>
-        </div>
-
-        {/* Demo Switcher Toggle */}
-        <button
-          onClick={() => setIsSubscribed(!isSubscribed)}
-          className="inline-flex self-start items-center gap-2 rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-2 text-xs font-bold text-amber-600 transition-all hover:bg-amber-500/20 dark:text-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-500/40"
-        >
-          <span>Demo Access: {isSubscribed ? "👑 Active Member" : "🔒 Guest"}</span>
-          <span className="text-[10px] bg-amber-500 text-white rounded px-2 py-0.5 font-semibold">Toggle</span>
-        </button>
-      </div>
-
       {isSubscribed ? (
-        /* SUBSCRIBED USER: Interactive search, categories & premium articles */
-        <div className="space-y-6">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            {/* Category Pills */}
-            <div className="flex gap-2 overflow-x-auto no-scrollbar py-1">
-              {CATEGORIES.map((category) => (
-                <button
-                  key={category}
-                  onClick={() => setSelectedCategory(category)}
-                  className={`rounded-xl px-4 py-2 text-xs font-semibold whitespace-nowrap transition-all duration-200 ${
-                    selectedCategory === category
-                      ? "bg-amber-500 text-white shadow-md shadow-amber-500/15"
-                      : "bg-muted text-muted-foreground hover:bg-muted/80 hover:text-foreground"
-                  }`}
-                >
-                  {category}
-                </button>
-              ))}
-            </div>
-
-            {/* Search Input */}
-            <div className="relative w-full sm:max-w-xs">
-              <Search className="absolute top-2.5 left-3.5 h-4 w-4 text-muted-foreground" />
-              <input
-                type="text"
-                placeholder="Search premium articles..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full rounded-xl border border-border bg-card py-2.5 pl-10 pr-4 text-sm text-foreground outline-none transition-all placeholder:text-muted-foreground focus:border-amber-500 focus:ring-1 focus:ring-amber-500"
-              />
-            </div>
+        /* SUBSCRIBED USER: Premium articles grid directly */
+        newsList.length > 0 ? (
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {newsList.map((news) => (
+              <NewsCard key={news.id} news={news} />
+            ))}
           </div>
-
-          {/* Dynamic Grid layout */}
-          {filteredNews.length > 0 ? (
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {filteredNews.map((news) => (
-                <NewsCard key={news.id} news={news} />
-              ))}
+        ) : (
+          <div className="flex flex-col items-center justify-center py-16 text-center">
+            <div className="mb-4 rounded-2xl bg-muted p-4">
+              <Newspaper className="h-8 w-8 text-muted-foreground" />
             </div>
-          ) : (
-            <div className="flex flex-col items-center justify-center py-16 text-center">
-              <div className="mb-4 rounded-2xl bg-muted p-4">
-                <Newspaper className="h-8 w-8 text-muted-foreground" />
-              </div>
-              <h3 className="text-lg font-bold text-foreground">No matches found</h3>
-              <p className="text-sm text-muted-foreground max-w-sm mt-1">
-                We couldn't find any premium articles matching your search criteria.
-              </p>
-            </div>
-          )}
-        </div>
+            <h3 className="text-lg font-bold text-foreground">No matches found</h3>
+            <p className="text-sm text-muted-foreground max-w-sm mt-1">
+              We couldn't find any premium articles matching your search criteria.
+            </p>
+          </div>
+        )
       ) : (
         /* GUEST USER: Blurred preview cards with interactive membership CTA box */
         <div className="relative">
