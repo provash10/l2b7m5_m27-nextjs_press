@@ -222,3 +222,46 @@ export const getMyPosts = async () => {
   const result = await res.json();
   return result;
 };
+
+export const deletePost = async (postId: string) => {
+  const cookieStore = await cookies();
+  const accessToken = cookieStore.get("accessToken")?.value || null;
+
+  if (!accessToken) {
+    return {
+      success: false,
+      message: "User not logged in!",
+    };
+  }
+
+  try {
+    const res = await fetch(`${process.env.BACKEND_API_URL}/api/posts/${postId}`, {
+      method: "DELETE",
+      headers: {
+        Cookie: `accessToken=${accessToken}`,
+      },
+    });
+
+    const result = await res.json();
+
+    if (result.success) {
+      (revalidateTag as any)("my-posts", {
+        expire: 0,
+      });
+      (revalidateTag as any)("public-posts", {
+        expire: 0,
+      });
+      (revalidateTag as any)("premium-posts", {
+        expire: 0,
+      });
+      revalidatePath("/dashboard/my-posts");
+    }
+
+    return result;
+  } catch (error: any) {
+    return {
+      success: false,
+      message: error?.message || "Failed to delete post",
+    };
+  }
+};

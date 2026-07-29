@@ -42,7 +42,7 @@ export async function MyPostsList() {
   }
 
   return (
-    <div className="grid grid-cols-1 gap-4 max-w-xl">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full">
       {result.data.map((post: any) => (
         <MyPostCard key={post.id} post={post} />
       ))}
