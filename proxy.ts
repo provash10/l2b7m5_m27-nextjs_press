@@ -149,7 +149,7 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
-  if (pathname.startsWith("/dashboard") && userRole !== "USER") {
+  if (pathname.startsWith("/dashboard") && !["USER", "AUTHOR", "ADMIN"].includes(userRole as string)) {
     return NextResponse.redirect(new URL("/not-found", request.url));
   }
 

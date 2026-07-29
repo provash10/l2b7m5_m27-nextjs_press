@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidateTag } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { cookies } from "next/headers";
 
 type PostState = {
@@ -9,7 +9,7 @@ type PostState = {
   data?: any;
 } | null;
 
-export const createPost = async (prevState: PostState, formData: FormData) => {
+export const createPost = async (...args: any[]) => {
   const cookieStore = await cookies();
   const accessToken = cookieStore.get("accessToken")?.value || null;
 
@@ -20,17 +20,40 @@ export const createPost = async (prevState: PostState, formData: FormData) => {
     };
   }
 
-  const title = formData.get("title");
-  const content = formData.get("content");
-  const thumbnail = formData.get("thumbnail");
-  const tagsStr = formData.get("tags") as string;
-  const tags = tagsStr ? tagsStr.split(",").map((t) => t.trim()).filter(Boolean) : [];
+  let formData: any = args.find((a) => a && typeof a.get === "function");
+  if (!formData) {
+    formData = args.find((a) => a && a instanceof FormData);
+  }
+  if (!formData && args.length > 0) {
+    formData = args[args.length - 1];
+  }
+
+  const getVal = (key: string) => {
+    if (!formData) return "";
+    if (typeof formData.get === "function") {
+      return formData.get(key);
+    }
+    if (typeof formData === "object" && key in formData) {
+      return formData[key];
+    }
+    return "";
+  };
+
+  const title = getVal("title");
+  const content = getVal("content");
+  const thumbnail = getVal("thumbnail");
+  const tagsVal = getVal("tags");
+  const tagsStr = typeof tagsVal === "string" ? tagsVal : Array.isArray(tagsVal) ? tagsVal.join(", ") : "";
+  const tags = tagsStr ? tagsStr.split(",").map((t: string) => t.trim()).filter(Boolean) : [];
+  const isPremiumVal = getVal("isPremium");
+  const isPremium = isPremiumVal === "true" || isPremiumVal === "on" || isPremiumVal === true;
 
   const payload = {
     title,
     content,
     thumbnail: thumbnail || null,
     tags,
+    isPremium,
   };
 
   try {
@@ -46,14 +69,22 @@ export const createPost = async (prevState: PostState, formData: FormData) => {
     const result = await res.json();
 
     if (result.success) {
-      (revalidateTag as any)("my-posts", "max");
+      (revalidateTag as any)("my-posts", {
+        expire: 0,
+      });
     }
 
     if (result.success && result.data?.isPremium) {
-      (revalidateTag as any)("premium-posts", "max");
+      (revalidateTag as any)("premium-posts", {
+        expire: 0,
+      });
     } else if (result.success) {
-      (revalidateTag as any)("public-posts", "max");
+      (revalidateTag as any)("public-posts", {
+        expire: 0,
+      });
     }
+
+    revalidatePath("/dashboard/my-posts");
 
     return result;
   } catch (error: any) {
@@ -64,7 +95,60 @@ export const createPost = async (prevState: PostState, formData: FormData) => {
   }
 };
 
-export const updatePost = async (postId: string, prevState: PostState, formData: FormData) => {
+export const updatePost = async (...args: any[]) => {
+  let postId = "";
+  for (const arg of args) {
+    if (typeof arg === "string" && arg.length > 0) {
+      postId = arg;
+      break;
+    }
+  }
+
+  let formData: any = args.find((a) => a && typeof a.get === "function");
+  if (!formData) {
+    formData = args.find((a) => a && a instanceof FormData);
+  }
+  if (!formData && args.length > 0) {
+    formData = args[args.length - 1];
+  }
+
+  const getVal = (key: string) => {
+    if (!formData) return "";
+    if (typeof formData.get === "function") {
+      return formData.get(key);
+    }
+    if (typeof formData === "object" && key in formData) {
+      return formData[key];
+    }
+    return "";
+  };
+
+  const title = getVal("title");
+  const content = getVal("content");
+  const thumbnail = getVal("thumbnail");
+  const tagsVal = getVal("tags");
+  const tagsStr = typeof tagsVal === "string" ? tagsVal : Array.isArray(tagsVal) ? tagsVal.join(", ") : "";
+  const tags = tagsStr ? tagsStr.split(",").map((t: string) => t.trim()).filter(Boolean) : [];
+  const isPremiumVal = getVal("isPremium");
+  const isPremium = isPremiumVal === "true" || isPremiumVal === "on" || isPremiumVal === true;
+
+  console.log({
+    postId,
+    title,
+    content,
+    thumbnail,
+    tags,
+    isPremium,
+  });
+
+  const payload = {
+    title: title ?? "",
+    content: content ?? "",
+    thumbnail: thumbnail ?? "",
+    tags,
+    isPremium,
+  };
+
   const cookieStore = await cookies();
   const accessToken = cookieStore.get("accessToken")?.value || null;
 
@@ -74,19 +158,6 @@ export const updatePost = async (postId: string, prevState: PostState, formData:
       message: "User not logged in!",
     };
   }
-
-  const title = formData.get("title");
-  const content = formData.get("content");
-  const thumbnail = formData.get("thumbnail");
-  const tagsStr = formData.get("tags") as string;
-  const tags = tagsStr ? tagsStr.split(",").map((t) => t.trim()).filter(Boolean) : [];
-
-  const payload = {
-    title,
-    content,
-    thumbnail: thumbnail || null,
-    tags,
-  };
 
   try {
     const res = await fetch(`${process.env.BACKEND_API_URL}/api/posts/${postId}`, {
@@ -101,14 +172,22 @@ export const updatePost = async (postId: string, prevState: PostState, formData:
     const result = await res.json();
 
     if (result.success) {
-      (revalidateTag as any)("my-posts", "max");
+      (revalidateTag as any)("my-posts", {
+        expire: 0,
+      });
     }
 
     if (result.success && result.data?.isPremium) {
-      (revalidateTag as any)("premium-posts", "max");
+      (revalidateTag as any)("premium-posts", {
+        expire: 0,
+      });
     } else if (result.success) {
-      (revalidateTag as any)("public-posts", "max");
+      (revalidateTag as any)("public-posts", {
+        expire: 0,
+      });
     }
+
+    revalidatePath("/dashboard/my-posts");
 
     return result;
   } catch (error: any) {
@@ -134,9 +213,8 @@ export const getMyPosts = async () => {
     headers: {
       Cookie: `accessToken=${accessToken}`,
     },
-    cache: "force-cache",
+    cache: "no-store",
     next: {
-      revalidate: 60 * 60 * 24,
       tags: ["my-posts"],
     },
   });
