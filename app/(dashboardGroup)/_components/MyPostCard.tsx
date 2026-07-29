@@ -1,33 +1,24 @@
 "use client";
 
 import React from "react";
-import { Edit3, MessageSquare } from "lucide-react";
+import { MessageSquare } from "lucide-react";
 import { cn } from "@/lib/utils";
-
-export interface PostItem {
-  id: string;
-  title: string;
-  content: string;
-  thumbnailUrl: string;
-  tags: string;
-  isPremium: boolean;
-  status: "DRAFT" | "PUBLISHED" | "UNDER_REVIEW";
-  createdAt: string;
-  commentsCount?: number;
-}
+import { IPost } from "@/lib/types";
+import { PostFormDialog } from "./PostFormDialog";
 
 interface MyPostCardProps {
-  post: PostItem;
-  onEdit: (post: PostItem) => void;
+  post: IPost | any;
 }
 
-export function MyPostCard({ post, onEdit }: MyPostCardProps) {
-  const { title, content, status, createdAt, commentsCount = 0 } = post;
+export function MyPostCard({ post }: MyPostCardProps) {
+  const { title, content, status, createdAt, _count } = post;
+  const commentsCount = _count?.comments ?? 0;
 
-  const statusColors = {
+  const statusColors: Record<string, string> = {
     PUBLISHED: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20",
     DRAFT: "bg-slate-500/10 text-slate-600 border-slate-500/20",
     UNDER_REVIEW: "bg-amber-500/10 text-amber-600 border-amber-500/20",
+    ARCHIVED: "bg-rose-500/10 text-rose-600 border-rose-500/20",
   };
 
   return (
@@ -42,13 +33,7 @@ export function MyPostCard({ post, onEdit }: MyPostCardProps) {
         >
           {status}
         </span>
-        <button
-          onClick={() => onEdit(post)}
-          className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1 text-xs font-semibold text-foreground transition-all hover:bg-muted focus:outline-none"
-        >
-          <Edit3 className="h-3.5 w-3.5" />
-          Edit
-        </button>
+        <PostFormDialog mode="edit" post={post} />
       </div>
 
       {/* Post Title */}
@@ -64,11 +49,11 @@ export function MyPostCard({ post, onEdit }: MyPostCardProps) {
       {/* Footer row: Date and Comments count */}
       <div className="flex items-center justify-between border-t border-border/40 pt-4 text-xs text-muted-foreground">
         <span>
-          {new Date(createdAt).toLocaleDateString("en-US", {
+          {createdAt ? new Date(createdAt).toLocaleDateString("en-US", {
             month: "numeric",
             day: "numeric",
             year: "numeric",
-          })}
+          }) : ""}
         </span>
         <span className="flex items-center gap-1.5">
           <MessageSquare className="h-3.5 w-3.5" />
