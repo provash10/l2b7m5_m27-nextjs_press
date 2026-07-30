@@ -1,16 +1,15 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { toast } from "sonner";
 import {
   CircleUserIcon,
-  CreditCardIcon,
-  LayoutDashboardIcon,
+  LayoutDashboard,
   LogOut,
-  SettingsIcon,
-  UserIcon,
+  Settings,
+  User,
 } from "lucide-react";
 import { logout } from "@/service/logOut";
 
@@ -40,86 +39,42 @@ const navLinks = [
 ];
 
 const userMenuItems = [
-  { label: "Profile", href: "/profile", icon: UserIcon },
-  { label: "Dashboard", href: "/dashboard", icon: LayoutDashboardIcon },
-  { label: "Billing", href: "/billing", icon: CreditCardIcon },
-  { label: "Settings", href: "/settings", icon: SettingsIcon },
-  
+  { label: "Dashboard", icon: LayoutDashboard, action: "dashboard" },
+  { label: "Profile", icon: User, action: "profile" },
+  { label: "Settings", icon: Settings, action: "settings" },
 ];
 
-//  "data": {
-//         "profile": {
-//             "id": "8dc64e20-1c38-495e-8b83-d86dcf8a93dd",
-//             "name": "Salman Shah",
-//             "email": "salmanshah100@gmail.com",
-//             "profilePhoto": null,
-//             "activeStatus": "ACTIVE",
-//             "role": "USER",
-//             "createdAt": "2026-07-18T17:09:51.088Z",
-//             "updatedAt": "2026-07-18T17:09:51.088Z",
-//             "profile": {
-//                 "id": "544561d9-c952-44b5-9277-1b1d2a91dcef",
-//                 "profilePhoto": "https://example.com/photo.jpg",
-//                 "bio": "",
-//                 "userId": "8dc64e20-1c38-495e-8b83-d86dcf8a93dd",
-//                 "createdAt": "2026-07-18T17:09:51.088Z",
-//                 "updatedAt": "2026-07-18T17:09:51.088Z"
-//             }
-//         }
-//     }
-
-// ======
-// type IUser = {
-//   success: boolean;
-//   message: string;
-//   data?: {
-//     profile: {
-//       id: string;
-//       name: string;
-//       email: string;
-//       profilePhoto: string | null;
-//       activeStatus: string;
-//       role: string;
-//       createdAt: string;
-//       updatedAt: string;
-//       profile: {
-//         id: string;
-//         profilePhoto: string | null;
-//         bio: string;
-//         userId: string;
-//         createdAt: string;
-//         updatedAt: string;
-//       };
-//     };
-//   };
-// };
-
-// type NavbarProps = {
-//   user: IUser | null | undefined;
-// };
-
-export function Navbar({user} : NavbarProps) {
+export function Navbar({ user }: NavbarProps) {
   const pathname = usePathname();
-
-  console.log(user?.success, "success")
   const router = useRouter();
-  const handleUserMenuAction = async(action: string) =>{
 
-     if(action ==="logout"){
+  const handleUserMenuAction = async (action: string) => {
+    if (action === "dashboard") {
+      if (user?.data?.profile.role === "USER") {
+        router.push("/dashboard");
+      } else if (user?.data?.profile.role === "AUTHOR") {
+        router.push("/author-dashboard");
+      } else if (user?.data?.profile.role === "ADMIN") {
+        router.push("/admin-dashboard");
+      }
+      return;
+    }
+
+    if (action === "profile") {
+      router.push("/profile");
+    }
+
+    if (action === "settings") {
+      router.push("/settings");
+    }
+
+    if (action === "logout") {
       await logout();
-      toast.success("User Logged Out Successfully");
+      toast.success("User Logged Out Successfully!");
       router.push("/login");
       router.refresh();
-     }
+    }
   };
-
-  // useEffect(()=>{
-  //   if(user && !user?.success){
-  //     toast.success("User Logged Out Successfully")
-  //   }
-  // }, [user?.success])
-
- 
 
   return (
     <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -158,69 +113,67 @@ export function Navbar({user} : NavbarProps) {
         </nav>
 
         {/* User dropdown */}
-        {
-          user?.success ? (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="rounded-full"
-                  aria-label="Open user menu"
-                >
-                  <Avatar className="size-8">
-                    <AvatarImage src="/diverse-avatars.png" alt="User avatar" />
-                    <AvatarFallback>JD</AvatarFallback>
-                  </Avatar>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56">
-                <DropdownMenuLabel>
-                  <div className="flex flex-col">
-                    <span className="text-sm font-medium text-foreground">
-                      {/* Jane Doe */}
-                      {user?.data?.profile.name || "Name"}
-                    </span>
-                    <span className="text-xs font-normal text-muted-foreground">
-                      {/* jane@acme.com */}
-                      {user?.data?.profile.email || "Email"}
-                    </span>
-                  </div>
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuGroup>
-                  {userMenuItems.map((item) => {
-                    const Icon = item.icon;
-                    return (
-                      <DropdownMenuItem key={item.href} asChild>
-                        <Link
-                          href={item.href}
-                          className="flex cursor-pointer items-center gap-2"
-                        >
-                          <Icon />
-                          {item.label}
-                        </Link>
-                      </DropdownMenuItem>
-                    );
-                  })}
-                </DropdownMenuGroup>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={async () => {
+        {user?.success ? (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="rounded-full"
+                aria-label="Open user menu"
+              >
+                <Avatar className="size-8">
+                  <AvatarImage src="/diverse-avatars.png" alt="User avatar" />
+                  <AvatarFallback>JD</AvatarFallback>
+                </Avatar>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56">
+              <DropdownMenuLabel>
+                <div className="flex flex-col">
+                  <span className="text-sm font-medium text-foreground">
+                    {user?.data?.profile.name || "Name"}
+                  </span>
+                  <span className="text-xs font-normal text-muted-foreground">
+                    {user?.data?.profile.email || "Email"}
+                  </span>
+                </div>
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuGroup>
+                {userMenuItems.map((item) => {
+                  const Icon = item.icon;
+                  return (
+                    <DropdownMenuItem
+                      key={item.action}
+                      onClick={() => handleUserMenuAction(item.action)}
+                      className="flex cursor-pointer items-center gap-2"
+                    >
+                      <Icon className="w-4 h-4 mr-2" />
+                      <span>{item.label}</span>
+                    </DropdownMenuItem>
+                  );
+                })}
+              </DropdownMenuGroup>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onClick={async () => {
                   await handleUserMenuAction("logout");
-                }}>
-                  <LogOut className="w-4 h-4 mr-2" />
-                  <span>Log out</span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          ) : (
-            <Button asChild size="sm">
-              <Link href="/login" className="cursor-pointer">
-                Login
-              </Link>
-            </Button>
-          )
-        }
+                }}
+                className="flex cursor-pointer items-center gap-2 text-destructive focus:text-destructive"
+              >
+                <LogOut className="w-4 h-4 mr-2" />
+                <span>Log out</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        ) : (
+          <Button asChild size="sm">
+            <Link href="/login" className="cursor-pointer">
+              Login
+            </Link>
+          </Button>
+        )}
       </div>
     </header>
   );
