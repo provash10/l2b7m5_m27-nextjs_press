@@ -145,10 +145,19 @@ export async function proxy(request: NextRequest) {
     (route) => pathname === route || pathname.startsWith(route + "/")
   );
 
+  //Authenticated pages protection : Authorization is not handled yet
+
   if (!accessToken && !isPublicRoute && !isAuthRoute) {
-    return NextResponse.redirect(new URL("/login", request.url));
+    // return NextResponse.redirect(new URL("/login", request.url));
+    const loginUrl = new URL("/login", request.url);
+    console.log(pathname + request.nextUrl.search)
+
+    loginUrl.searchParams.set("redirectTo", pathname + request.nextUrl.search)
+
+    return NextResponse.redirect(loginUrl);
   }
 
+  //Authorization : Role based access control
   if (pathname.startsWith("/dashboard") && !["USER", "AUTHOR", "ADMIN"].includes(userRole as string)) {
     return NextResponse.redirect(new URL("/not-found", request.url));
   }
