@@ -2,77 +2,91 @@
 
 import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
-import jwt, { JwtPayload } from "jsonwebtoken"
+import jwt, { JwtPayload } from "jsonwebtoken";
 
-// Updated LoginState type to support both success and failure cases.
-type LoginState = {
-  success: boolean; // Changed from true to boolean to accommodate failure responses
-  statusCode: number;
-  message: string;
-  data?: { // Made optional (?) because login failures won't return tokens
+export type LoginState = {
+  success: boolean;
+  statusCode?: number;
+  message?: string;
+  data?: {
     accessToken: string;
     refreshToken: string;
-  }
+  };
 };
 
-// Use LoginState | null for prevState because the initial state of the hook is null.
-export const loginAction = async (redirectTo : string, prevState: LoginState | null, formData: FormData) => {
-  console.log(formData);
-  console.log(prevState, "prev state");
+export const loginAction = async (
+  prevState: LoginState | null,
+  formData: FormData
+) => {
+  if (!formData || typeof formData.get !== "function") {
+    return {
+      success: false,
+      message: "Invalid form submission",
+    };
+  }
 
   const email = formData.get("email");
   const password = formData.get("password");
+  const redirectTo = (formData.get("redirectTo") as string) || "";
 
   const payload = {
     email,
-    password
+    password,
+  };
+
+  let result: LoginState;
+
+  try {
+    const res = await fetch(`${process.env.BACKEND_API_URL}/api/auth/login`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    });
+
+    result = await res.json();
+  } catch (error: any) {
+    return {
+      success: false,
+      message: error?.message || "Failed to connect to backend server",
+    };
   }
 
-  const res = await fetch(`${process.env.BACKEND_API_URL}/api/auth/login`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify(payload)
-  })
+  if (result.success && result.data) {
+    const cookieStore = await cookies();
 
-  // Typed as LoginState (which cannot be null) to avoid null check errors on the result object.
-  const result: LoginState = await res.json();
-  // console.log(result);
+    cookieStore.set("accessToken", result.data.accessToken, {
+      httpOnly: true,
+      maxAge: 60 * 60 * 24,
+      sameSite: "lax",
+    });
 
-  if (result.success) {
-    if (result.data) {
-      const cookieStore = await cookies()
+    cookieStore.set("refreshToken", result.data.refreshToken, {
+      httpOnly: true,
+      maxAge: 60 * 60 * 24 * 7,
+      sameSite: "lax",
+    });
 
-      cookieStore.set("accessToken", result.data.accessToken, {
-        httpOnly: true,
-        maxAge: 60 * 60 * 24,
-        sameSite: "lax",
-      })
+    if (
+      redirectTo &&
+      typeof redirectTo === "string" &&
+      redirectTo.startsWith("/") &&
+      !redirectTo.startsWith("//")
+    ) {
+      redirect(redirectTo);
+    }
 
-      cookieStore.set("refreshToken", result.data.refreshToken, {
-        httpOnly: true,
-        maxAge: 60 * 60 * 24 * 7,
-        sameSite: "lax"
-      })
+    const decodedToken = jwt.decode(result.data.accessToken) as JwtPayload;
 
-      const decodedToken = jwt.decode(result.data.accessToken) as JwtPayload;
-      console.log(decodedToken);
-
-      if(redirectTo && typeof redirectTo === "string" && redirectTo.startsWith("/") && 
-      !redirectTo.startsWith("//")){
-        redirect(redirectTo)
-      }
-
-      if (decodedToken?.role === "USER") {
-        redirect("/dashboard");
-      } else if (decodedToken?.role === "ADMIN") {
-        redirect("/admin-dashboard");
-      } else if (decodedToken?.role === "AUTHOR") {
-        redirect("/author-dashboard");
-      }
+    if (decodedToken?.role === "USER") {
+      redirect("/dashboard");
+    } else if (decodedToken?.role === "ADMIN") {
+      redirect("/admin-dashboard");
+    } else if (decodedToken?.role === "AUTHOR") {
+      redirect("/author-dashboard");
     }
   }
 
   return result;
-}
+};

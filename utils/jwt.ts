@@ -1,27 +1,22 @@
-"use server";
-
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import jwt from "jsonwebtoken"
+import jwt from "jsonwebtoken";
 
-
-const verifyToken = (token :string, secret: string)=>{
-    try {
-        const verifiedToken =  jwt.verify(token, secret);
-    // return verifiedToken;
+export const verifyToken = (token: string, secret: string) => {
+  try {
+    const verifiedToken = jwt.verify(token, secret);
     return {
-        success :true,
-        data: verifiedToken
-    }
-    } catch (error : any) {
-        console.log("Token Verification failed:", error)
-        // throw new Error (error.message);
-        return {
-            success:false,
-            error:error.message
-        }
-    }
-}
+      success: true,
+      data: verifiedToken,
+    };
+  } catch (error: any) {
+    console.log("Token Verification failed:", error);
+    return {
+      success: false,
+      error: error.message,
+    };
+  }
+};
 
-export const jwtUtils ={
-    verifyToken,
-}
+export const jwtUtils = {
+  verifyToken,
+};
