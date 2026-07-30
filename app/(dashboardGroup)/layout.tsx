@@ -14,9 +14,9 @@ const DashboardLayout = async ({
     <div className="min-h-screen flex flex-col">
       <Navbar user={user} />
       <SidebarProvider>
-        <div className="flex flex-1">
-          <DashboardSidebar user={user}/>
-          <main className="flex-1 min-w-0">{children}</main>
+        <div className="flex flex-col md:flex-row flex-1 min-w-0">
+          <DashboardSidebar user={user} />
+          <main className="flex-1 min-w-0 p-4 md:p-6">{children}</main>
         </div>
       </SidebarProvider>
     </div>
