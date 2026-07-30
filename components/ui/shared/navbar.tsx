@@ -26,6 +26,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { NavbarProps } from "@/lib/types";
 
 const navLinks = [
   { label: "Home", href: "/" },
@@ -67,34 +68,35 @@ const userMenuItems = [
 //         }
 //     }
 
-type IUser = {
-  success: boolean;
-  message: string;
-  data?: {
-    profile: {
-      id: string;
-      name: string;
-      email: string;
-      profilePhoto: string | null;
-      activeStatus: string;
-      role: string;
-      createdAt: string;
-      updatedAt: string;
-      profile: {
-        id: string;
-        profilePhoto: string | null;
-        bio: string;
-        userId: string;
-        createdAt: string;
-        updatedAt: string;
-      };
-    };
-  };
-};
+// ======
+// type IUser = {
+//   success: boolean;
+//   message: string;
+//   data?: {
+//     profile: {
+//       id: string;
+//       name: string;
+//       email: string;
+//       profilePhoto: string | null;
+//       activeStatus: string;
+//       role: string;
+//       createdAt: string;
+//       updatedAt: string;
+//       profile: {
+//         id: string;
+//         profilePhoto: string | null;
+//         bio: string;
+//         userId: string;
+//         createdAt: string;
+//         updatedAt: string;
+//       };
+//     };
+//   };
+// };
 
-type NavbarProps = {
-  user: IUser | null | undefined;
-};
+// type NavbarProps = {
+//   user: IUser | null | undefined;
+// };
 
 export function Navbar({user} : NavbarProps) {
   const pathname = usePathname();
